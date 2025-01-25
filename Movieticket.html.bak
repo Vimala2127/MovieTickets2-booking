@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ticket Booking</title>
+    <style>
+         body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-image: url('https://media.istockphoto.com/id/915697084/photo/concept-of-reserved-seats.jpg?s=612x612&w=0&k=20&c=vYKpKwkfF3FLLt-v9UUgOZop9veyg-nen8QxFKnhDro=');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        min-height: 100vh;
+    }
+        header {
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+        }
+        #main {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label, select, input, button {
+            display: block;
+            margin: 10px auto;
+            width: 90%;
+            max-width: 400px;
+        }
+        button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .movie-poster {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .movie-poster img {
+            width: 150px;
+            height: 200px;
+            border-radius: 10px;
+            cursor: pointer;
+			transition: transform 0.5s ease;
+        }
+			 }
+			 
+        .movie-poster p {
+            margin-top: 5px;
+color:black;
+background-color:white;
+        }
+#movie-selection h2 {
+    color: white;
+    }
+       #movie-selection h2,
+       #theater-selection h2,
+       #timing-selection h2,
+       #seat-selection h2 {
+         color: white;
+           }
+        .seat {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            margin: 5px;
+            text-align: center;
+            line-height: 30px;
+            border: 1px solid #333;
+			background-color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .seat.selected {
+            background-color: green;
+            color: white;
+        }
+        .ticket {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #fff;
+            margin-top: 20px;
+        }
+        .ticket h2 {
+            margin: 0;
+            color: #333;
+        }
+        .ticket p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .ticket .qr-code {
+            margin: 10px 0;
+        }
+        .cancel-button {
+            background-color: #e74c3c;
+            border: none;
+            padding: 10px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><b>PremierePortal</b></h1>
+    </header>
+    <div id="main">
+        <!-- Movie Selection -->
+        <section id="movie-selection">
+            <h2>CineTicket</h2>
+            <div id="movie-posters"></div>
+        </section>
+
+        <!-- Theater Selection -->
+        <section id="theater-selection" style="display: none;">
+            <h2>Select Theater</h2>
+            <div id="theater-list"></div>
+        </section>
+
+        <!-- Timing Selection -->
+        <section id="timing-selection" style="display: none;">
+            <h2>Select Showtime</h2>
+            <div id="timing-list"></div>
+        </section>
+
+        <!-- Seat Selection -->
+        <section id="seat-selection" style="display: none;">
+            <h2>Select Seats</h2>
+            <div id="seat-list"></div>
+            <p>Total Cost: <span id="seat-total-cost">Rs. 0</span></p>
+            <button type="button" id="confirm-seats">Confirm Seats</button>
+        </section>
+
+        <!-- Ticket Confirmation -->
+        <section id="ticket-confirmation" style="display: none;">
+            <div class="ticket">
+                <h2>Your Ticket</h2>
+                <p><strong>Movie:</strong> <span id="ticket-movie">Dilwale Dulhania Le Jayenge</span></p>
+                <p><strong>Screen:</strong> 1</p>
+                <p><strong>Seat(s):</strong> <span id="ticket-seats">A5, A6</span></p>
+                <p><strong>Showtime:</strong> <span id="ticket-time">11:30 AM</span></p>
+                <p><strong>Total Amount:</strong> <span id="ticket-amount">Rs. 300</span></p>
+                <div class="qr-code">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?data=SampleQRCode&size=100x100" alt="QR Code">
+                </div>
+                <button class="cancel-button" onclick="cancelBooking()">Cancel Booking</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const movies = [
+                { title: "Sankranthi ki Vastunnam", poster: "https://assetscdn1.paytm.com/images/cinema/Sankranthikivas-be353f20-9b34-11ef-bc46-4b10ec9d0304.jpg?format=webp" },
+                { title: "Game Changer", poster: "https://m.media-amazon.com/images/M/MV5BNzAwYWNkYmYtODJkYy00Mzg4LWI4YzUtYjA1MWQyYWQ0OGZjXkEyXkFqcGc@._V1_.jpg" },
+                { title: "Daku Maharaj", poster: "https://images.filmibeat.com/img/popcorn/movie_posters/daakumaharaaj-20241115131952-21845.jpg" },
+                { title: "UI: The Way of Water", poster: "https://assetscdn1.paytm.com/images/cinema/UI--Gallery-5d46ea60-bddf-11ef-a45f-17af860e2665.jpg" },
+{ title: "Prasanna Vadanam", poster: "https://assets-in.bmscdn.com/iedb/movies/images/mobile/thumbnail/xlarge/prasanna-vadanam-et00396085-1714976368.jpg" },
+                { title: "Vidudhala", poster: "https://c.saavncdn.com/767/Vidudhala-2-Original-Motion-Picture-Soundtrack-Telugu-2024-20241209181248-500x500.jpg" },
+                { title: "Pushpa2: The Rise", poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQi6JXOkvLD0ttLTKTpq5_uWM_L_lWrH-O8_Q&s" },
+{ title: "Wife Off" , poster:"https://bunny-wp-pullzone-ckynlfpwml.b-cdn.net/wp-content/uploads/2025/01/Wife-Off-Telugu-Poster.jpg"},
+{ title: "Fear", poster:"https://m.media-amazon.com/images/M/MV5BYjQzN2QxMzMtZjczZS00MjJlLTg4Y2QtNWYwMGIwYjIwOTRiXkEyXkFqcGc@._V1_.jpg" }
+            ];
+
+            const theaters = ["Sailaja", "SaiRam", "Alankar", "Sowmya"];
+            const timings = ["11:00 AM", "2:30 PM", "6:30 PM", "10:00 PM"];
+            const seatCost = 150;
+            let selectedSeats = [];
+
+            const moviePosters = document.getElementById("movie-posters");
+            const theaterList = document.getElementById("theater-list");
+            const timingList = document.getElementById("timing-list");
+            const seatList = document.getElementById("seat-list");
+            const seatTotalCost = document.getElementById("seat-total-cost");
+            const ticketMovie = document.getElementById("ticket-movie");
+            const ticketSeats = document.getElementById("ticket-seats");
+            const ticketTime = document.getElementById("ticket-time");
+            const ticketAmount = document.getElementById("ticket-amount");
+
+            movies.forEach(movie => {
+                const div = document.createElement("div");
+                div.className = "movie-poster";
+                div.innerHTML = `<img src="${movie.poster}" alt="${movie.title}"><p>${movie.title}</p>`;
+                div.addEventListener("click", () => {
+                    document.getElementById("movie-selection").style.display = "none";
+                    document.getElementById("theater-selection").style.display = "block";
+                    ticketMovie.textContent = movie.title;
+                });
+                moviePosters.appendChild(div);
+            });
+
+            theaters.forEach(theater => {
+                const button = document.createElement("button");
+                button.textContent = theater;
+                button.addEventListener("click", () => {
+                    document.getElementById("theater-selection").style.display = "none";
+                    document.getElementById("timing-selection").style.display = "block";
+                });
+                theaterList.appendChild(button);
+            });
+
+            timings.forEach(time => {
+                const button = document.createElement("button");
+                button.textContent = time;
+                button.addEventListener("click", () => {
+                    document.getElementById("timing-selection").style.display = "none";
+                    document.getElementById("seat-selection").style.display = "block";
+                    ticketTime.textContent = time;
+                    renderSeats();
+                });
+                timingList.appendChild(button);
+            });
+
+            function renderSeats() {
+                seatList.innerHTML = "";
+                selectedSeats = [];
+                for (let i = 1; i <= 30; i++) {
+                    const seat = document.createElement("div");
+                    seat.className = "seat";
+                    seat.textContent = `A${i}`;
+                    seat.addEventListener("click", () => {
+                        if (seat.classList.contains("selected")) {
+                            seat.classList.remove("selected");
+                            selectedSeats = selectedSeats.filter(s => s !== seat.textContent);
+                        } else {
+                            seat.classList.add("selected");
+                            selectedSeats.push(seat.textContent);
+                        }
+                        updateTotalCost();
+                    });
+                    seatList.appendChild(seat);
+                }
+            }
+
+            function updateTotalCost() {
+                seatTotalCost.textContent = `Rs. ${selectedSeats.length * seatCost}`;
+            }
+
+            document.getElementById("confirm-seats").addEventListener("click", function () {
+                document.getElementById("seat-selection").style.display = "none";
+                document.getElementById("ticket-confirmation").style.display = "block";
+                ticketSeats.textContent = selectedSeats.join(", ");
+                ticketAmount.textContent = `Rs. ${selectedSeats.length * seatCost}`;
+            });
+
+            function cancelBooking() {
+                if (confirm("Are you sure you want to cancel this booking?")) {
+                    alert("Booking canceled successfully.");
+                    location.reload();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
